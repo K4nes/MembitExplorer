@@ -1,7 +1,9 @@
 // Membit Explorer - Main Application Logic
 
-// Use proxy in development to avoid CORS issues
-const API_BASE = import.meta.env.DEV ? "/api" : "https://api.membit.ai/v1";
+// Use proxy to avoid CORS issues
+// In development: Vite proxy handles /api -> https://api.membit.ai/v1
+// In production: Netlify function handles /api -> https://api.membit.ai/v1
+const API_BASE = "/api";
 let currentTab = "clusters";
 let currentResults = [];
 let clustersResults = [];

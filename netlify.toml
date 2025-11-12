@@ -1,0 +1,16 @@
+# Netlify configuration file
+
+[build]
+  # Build command (if needed)
+  command = "npm run build"
+  # Directory to publish
+  publish = "dist"
+
+# Rewrite /api/* requests to the Netlify function
+# The :splat captures everything after /api/ and passes it as a query parameter
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/proxy?path=:splat"
+  status = 200
+  force = true
+
