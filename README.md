@@ -61,7 +61,7 @@ The application connects to the Membit API to fetch real-time social media data 
 1. **Clone or download the repository**
 
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/K4nes/MembitExplorer
     cd MembitExplorer
     ```
 
