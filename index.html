@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Explore trending X (Twitter) posts and topic clusters with AI-powered insights. Search, analyze, and discover social media content using the Membit API."
+        />
+        <link
+            rel="icon"
+            type="image/svg+xml"
+            href="/images/Kanes-favicon.svg"
+        />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+            rel="stylesheet"
+        />
+        <title>Membit Explorer - Discover X Posts with AI</title>
+        <link rel="stylesheet" href="/src/style.css" />
+    </head>
+    <body>
+        <div id="app">
+            <!-- Header -->
+            <header class="header">
+                <div class="container">
+                    <div class="header-content">
+                        <h1 class="logo">
+                            <img
+                                src="/images/membit-logo.svg"
+                                alt="Membit Logo"
+                                class="logo-icon"
+                            />
+                            Membit Explorer
+                        </h1>
+                        <div class="header-actions">
+                            <button
+                                id="themeToggle"
+                                class="icon-btn"
+                                title="Toggle theme"
+                            >
+                                <i class="fa-solid fa-moon theme-icon"></i>
+                            </button>
+                            <button
+                                id="bookmarksBtn"
+                                class="icon-btn"
+                                title="Bookmarks"
+                            >
+                                <i class="fa-solid fa-bookmark"></i>
+                                <span id="bookmarkCount" class="badge">0</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="main">
+                <div class="container">
+                    <!-- Search Section -->
+                    <section class="search-section">
+                        <div class="search-tabs">
+                            <button class="tab-btn active" data-tab="clusters">
+                                Search Clusters
+                            </button>
+                            <button class="tab-btn" data-tab="posts">
+                                Search Posts
+                            </button>
+                        </div>
+
+                        <div class="search-container">
+                            <div class="search-box">
+                                <input
+                                    type="text"
+                                    id="searchInput"
+                                    placeholder="Search for trending topic clusters..."
+                                    minlength="3"
+                                />
+                                <button id="searchBtn" class="btn btn-primary">
+                                    <span class="btn-text">Search</span>
+                                    <span class="btn-loader hidden"
+                                        ><i
+                                            class="fa-solid fa-hourglass-half"
+                                        ></i
+                                    ></span>
+                                </button>
+                            </div>
+
+                            <!-- Advanced Filters -->
+                            <div class="filters collapsed" id="filters">
+                                <button class="filter-toggle" id="filterToggle">
+                                    Advanced Filters
+                                    <i
+                                        class="fa-solid fa-chevron-down arrow"
+                                    ></i>
+                                </button>
+                                <div class="filter-content">
+                                    <div class="filter-group">
+                                        <label
+                                            >Max Results:
+                                            <span id="maxResultsValue"
+                                                >10</span
+                                            ></label
+                                        >
+                                        <input
+                                            type="range"
+                                            id="maxResults"
+                                            min="10"
+                                            max="50"
+                                            value="10"
+                                            step="1"
+                                            class="max-results-slider"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- API Keys Input -->
+                            <div class="api-key-section">
+                                <input
+                                    type="password"
+                                    id="apiKey"
+                                    placeholder="Enter your Membit API key"
+                                    class="api-key-input"
+                                />
+                                <small
+                                    >Get your API key at
+                                    <a href="https://membit.ai" target="_blank"
+                                        >membit.ai</a
+                                    ></small
+                                >
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Natural Language Query Section -->
+                    <section
+                        class="nl-query-section hidden"
+                        id="nlQuerySection"
+                    >
+                        <div class="nl-query-card">
+                            <h3>
+                                <i class="fa-solid fa-comments"></i> Ask AI
+                                About Results
+                            </h3>
+                            <div class="nl-query-box">
+                                <input
+                                    type="text"
+                                    id="nlQueryInput"
+                                    placeholder="Ask anything about the results... (e.g., 'What are the main themes?')"
+                                    class="nl-query-input"
+                                />
+                                <button id="nlQueryBtn" class="btn btn-primary">
+                                    Ask
+                                </button>
+                            </div>
+                            <div
+                                id="nlQueryResponse"
+                                class="nl-query-response hidden"
+                            ></div>
+                        </div>
+                    </section>
+
+                    <!-- AI Summary Section -->
+                    <section class="ai-section hidden" id="aiSection">
+                        <div class="ai-card">
+                            <div class="ai-card-header">
+                                <h3>
+                                    <i class="fa-solid fa-robot"></i> AI
+                                    Insights
+                                </h3>
+                                <button
+                                    id="generateSummary"
+                                    class="btn btn-secondary btn-sm"
+                                >
+                                    Generate Insights
+                                </button>
+                            </div>
+                            <div id="aiSummary" class="ai-content">
+                                <p class="ai-placeholder">
+                                    Click "Generate Insights" to get AI-powered
+                                    analysis
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Results Section -->
+                    <section class="results-section" id="resultsSection">
+                        <div class="results-header hidden" id="resultsHeader">
+                            <h2>Results</h2>
+                            <div class="results-actions">
+                                <button id="exportBtn" class="btn btn-outline">
+                                    Export
+                                </button>
+                                <select id="viewMode" class="view-selector">
+                                    <option value="grid">Grid View</option>
+                                    <option value="list">List View</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="results" class="results-grid"></div>
+                        <div id="loading" class="loading hidden">
+                            <div class="loader"></div>
+                            <p>Searching...</p>
+                        </div>
+                        <div id="error" class="error-message hidden"></div>
+                    </section>
+                </div>
+            </main>
+
+            <!-- Bookmarks Modal -->
+            <div id="bookmarksModal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fa-solid fa-bookmark"></i> Bookmarks</h2>
+                        <button class="modal-close">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="bookmarksList">
+                        <p class="empty-state">No bookmarks yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cluster Detail Modal -->
+            <div id="clusterModal" class="modal hidden">
+                <div class="modal-content large">
+                    <div class="modal-header">
+                        <h2 id="clusterTitle">Cluster Details</h2>
+                        <button class="modal-close">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="clusterDetails">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script
+            src="https://kit.fontawesome.com/a9f87584cb.js"
+            crossorigin="anonymous"
+        ></script>
+        <script type="module" src="/src/main.js"></script>
+    </body>
+</html>
