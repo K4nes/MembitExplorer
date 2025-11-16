@@ -1,6 +1,6 @@
 import { repairJSON } from "./json-repair.js";
 
-const SUMMARY_SCHEMA = {
+export const SUMMARY_SCHEMA = {
     type: "object",
     properties: {
         summary: { type: "string" },
@@ -42,7 +42,16 @@ const SUMMARY_SCHEMA = {
     required: ["summary", "keyInsights", "sentiment", "keyThemes", "topInfluencers"],
 };
 
-export async function callGeminiAPI(prompt, useStructuredOutput = false) {
+export async function callGeminiAPI(prompt, options = {}) {
+    const config =
+        typeof options === "boolean"
+            ? { structuredOutput: options }
+            : options || {};
+    const {
+        structuredOutput = false,
+        schema = SUMMARY_SCHEMA,
+        maxOutputTokens,
+    } = config;
     const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY?.trim();
 
     if (!geminiApiKey) {
@@ -67,13 +76,13 @@ export async function callGeminiAPI(prompt, useStructuredOutput = false) {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: useStructuredOutput ? 4096 : 1024,
+            maxOutputTokens: maxOutputTokens || (structuredOutput ? 4096 : 1024),
         },
     };
 
-    if (useStructuredOutput) {
+    if (structuredOutput) {
         requestBody.generationConfig.responseMimeType = "application/json";
-        requestBody.generationConfig.responseSchema = SUMMARY_SCHEMA;
+        requestBody.generationConfig.responseSchema = schema;
     }
 
     const response = await fetch(apiUrl, {
@@ -101,7 +110,7 @@ export async function callGeminiAPI(prompt, useStructuredOutput = false) {
         );
     }
 
-    if (useStructuredOutput) {
+    if (structuredOutput) {
         const text = data.candidates[0]?.content?.parts?.[0]?.text;
         if (!text) {
             const part = data.candidates[0]?.content?.parts?.[0];

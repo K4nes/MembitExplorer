@@ -22,30 +22,15 @@ The application connects to the Membit API to fetch real-time social media data 
 -   **Search Clusters**: Find trending topic clusters by keywords
 -   **Search Posts**: Search for individual posts by topics, keywords, or hashtags
 -   **Advanced Filters**: Adjustable max results (10-50 items)
--   **Tab-based Navigation**: Switch between cluster and post searches with preserved state
 
 ### 🤖 AI-Powered Features
 
 -   **AI Insights**: Generate comprehensive summaries with:
     -   Main themes and discussions
     -   Key insights
-    -   Top influencers (for post searches)
-    -   Key themes and topics
+    -   Key themes
 -   **Natural Language Queries**: Ask questions about search results in plain English
 -   **Contextual Analysis**: AI analyzes up to 20 results to provide meaningful insights
-
-### 📚 Content Management
-
--   **Bookmarks**: Save posts for later reference
--   **Export**: Download search results as JSON files
--   **Cluster Details**: View detailed information about topic clusters including related posts
-
-### 🎨 User Experience
-
--   **Dark/Light Theme**: Toggle between themes with preference saved in localStorage
--   **Grid/List Views**: Switch between different viewing modes
--   **Responsive Design**: Works on desktop and mobile devices
--   **Real-time Updates**: See engagement metrics and live data
 
 ## Installation
 
@@ -115,32 +100,6 @@ The application connects to the Membit API to fetch real-time social media data 
 7. **Ask questions** about the results using the "Ask AI About Results" section
 8. **Bookmark posts** by clicking the "Save" button on any post
 9. **Export results** as JSON using the Export button
-
-## Project Structure
-
-```
-MembitExplorer/
-├── dist/              # Production build output
-├── public/            # Static assets (images, favicon)
-│   └── images/
-├── src/
-│   ├── main.js       # Main application logic
-│   └── style.css     # Application styles
-├── index.html        # Main HTML file
-├── vite.config.js    # Vite configuration
-├── package.json      # Project dependencies and scripts
-└── .env              # Environment variables (create this)
-```
-
-## Technologies Used
-
--   **Vite** - Build tool and development server
--   **Vanilla JavaScript** - No framework dependencies
--   **CSS** - Custom styling with CSS variables for theming
--   **Font Awesome** - Icons
--   **Google Fonts** - Plus Jakarta Sans font family
--   **Membit API** - Social media data source
--   **Google Gemini API** - AI-powered analysis
 
 ## License
 

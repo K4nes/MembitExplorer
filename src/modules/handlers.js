@@ -134,7 +134,7 @@ ${
         ? "4. Top influencers array (return an empty array if specific influencers cannot be identified)"
         : "4. Top 3-5 influencers (based on engagement and content quality) with reasons"
 }
-5. Key themes/topics discussed (at least 3 short tag-like phrases)
+5. Key themes/topics discussed (3-5 single short sentences, each under 6 words, no commas)
 
 Format your response as JSON with this structure:
 {
@@ -516,7 +516,7 @@ function normalizeStringList(value) {
 function normalizeThemes(rawThemes, fallbackInsights = []) {
     const themes = normalizeStringList(rawThemes);
     if (themes.length > 0) {
-        return themes;
+        return themes.map(shortenTheme).filter(Boolean);
     }
     if (!Array.isArray(fallbackInsights)) {
         return [];
@@ -532,7 +532,24 @@ function normalizeThemes(rawThemes, fallbackInsights = []) {
                 .trim();
             return cleaned;
         })
+        .map(shortenTheme)
         .filter(Boolean)
         .slice(0, 5);
+}
+
+function shortenTheme(text) {
+    if (typeof text !== "string") {
+        return "";
+    }
+    const normalized = text
+        .replace(/[,;:/]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    const words = normalized.split(" ").filter(Boolean);
+    if (words.length === 0) {
+        return "";
+    }
+    const sliced = words.slice(0, 6).join(" ");
+    return sliced.charAt(0).toUpperCase() + sliced.slice(1);
 }
 
