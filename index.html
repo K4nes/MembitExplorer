@@ -20,7 +20,9 @@
             rel="stylesheet"
         />
         <title>Membit Explorer - Discover X Posts with AI</title>
-        <link rel="stylesheet" href="/src/style.css" />
+        <link rel="stylesheet" href="/src/styles/reset.css" />
+        <link rel="stylesheet" href="/src/styles/global.css" />
+        <link rel="stylesheet" href="/src/styles/style.css" />
     </head>
     <body>
         <div id="app">
@@ -28,14 +30,7 @@
             <header class="header">
                 <div class="container">
                     <div class="header-content">
-                        <h1 class="logo">
-                            <img
-                                src="/images/membit-logo.svg"
-                                alt="Membit Logo"
-                                class="logo-icon"
-                            />
-                            Membit Explorer
-                        </h1>
+                        <h1 class="logo">Membit Explorer</h1>
                         <div class="header-actions">
                             <button
                                 id="themeToggle"
@@ -51,6 +46,13 @@
                             >
                                 <i class="fa-solid fa-bookmark"></i>
                                 <span id="bookmarkCount" class="badge">0</span>
+                            </button>
+                            <button
+                                id="apiKeyBtn"
+                                class="icon-btn"
+                                title="Manage Membit API key"
+                            >
+                                <i class="fa-solid fa-key api-key-icon"></i>
                             </button>
                         </div>
                     </div>
@@ -116,22 +118,6 @@
                                         />
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- API Keys Input -->
-                            <div class="api-key-section">
-                                <input
-                                    type="password"
-                                    id="apiKey"
-                                    placeholder="Enter your Membit API key"
-                                    class="api-key-input"
-                                />
-                                <small
-                                    >Get your API key at
-                                    <a href="https://membit.ai" target="_blank"
-                                        >membit.ai</a
-                                    ></small
-                                >
                             </div>
                         </div>
                     </section>
@@ -223,6 +209,47 @@
                     </div>
                     <div class="modal-body" id="bookmarksList">
                         <p class="empty-state">No bookmarks yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Key Modal -->
+            <div id="apiKeyModal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fa-solid fa-key"></i> Membit API Key</h2>
+                        <button class="modal-close">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="api-key-form">
+                            <p>
+                                Store your Membit API key locally to
+                                authenticate searches. The key never leaves your
+                                browser.
+                            </p>
+                            <input
+                                type="password"
+                                id="apiKey"
+                                placeholder="Enter your Membit API key"
+                                class="api-key-input"
+                            />
+                            <small
+                                >Need a key?
+                                <a href="https://membit.ai" target="_blank"
+                                    >Get one at membit.ai</a
+                                ></small
+                            >
+                            <div class="api-key-actions">
+                                <button
+                                    id="saveApiKeyBtn"
+                                    class="btn btn-primary"
+                                >
+                                    Save API Key
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
