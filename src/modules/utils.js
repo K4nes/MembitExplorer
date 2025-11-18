@@ -155,3 +155,22 @@ export function openPostLink(url) {
     window.open(url, "_blank");
 }
 
+export function filterBySearchScore(items, minScore) {
+    if (!Array.isArray(items)) {
+        return [];
+    }
+    const threshold = Number.isFinite(minScore) ? minScore : Number(minScore) || 0;
+    return items.filter((item) => {
+        const rawScore = item?.search_score;
+        if (rawScore === undefined || rawScore === null) {
+            return false;
+        }
+        const numericScore =
+            typeof rawScore === "number" ? rawScore : Number(rawScore);
+        if (!Number.isFinite(numericScore)) {
+            return false;
+        }
+        return numericScore >= threshold;
+    });
+}
+

@@ -5,6 +5,7 @@ import {
     generateAISummary,
     openBookmarksModal,
     exportResults,
+    refreshResultsWithFilters,
 } from "./handlers.js";
 import { toggleTheme, saveAPIKey, showModal } from "./ui.js";
 import {
@@ -12,13 +13,17 @@ import {
     setCurrentTab,
     getCurrentResults,
     setCurrentResults,
-    getTabResults,
     setTabResults,
     getTabState,
     updateTabState,
+    getFilters,
+    updateFilters,
+    getCurrentRawResults,
+    setCurrentRawResults,
+    getTabRawResults,
+    setTabRawResults,
 } from "./state.js";
 import { SUMMARY_PLACEHOLDER, TAB_PLACEHOLDERS } from "./constants.js";
-import { displayClusters, displayPosts } from "./renderers.js";
 
 export function attachEventListeners() {
     elements.searchBtn?.addEventListener("click", handleSearch);
@@ -78,6 +83,10 @@ export function attachEventListeners() {
         }
     });
 
+    initScoreFilterControls();
+    elements.scoreFilterToggle?.addEventListener("change", handleScoreFilterToggle);
+    elements.scoreFilterSlider?.addEventListener("input", handleScoreFilterSlider);
+
     elements.exportBtn?.addEventListener("click", exportResults);
 
     elements.viewMode?.addEventListener("change", (event) => {
@@ -116,6 +125,7 @@ function persistCurrentTabState() {
         nlQueryResponse: elements.nlQueryResponse?.innerHTML || "",
     });
     setTabResults(currentTab, getCurrentResults());
+    setTabRawResults(currentTab, getCurrentRawResults());
 }
 
 function restoreTabState(tab) {
@@ -145,26 +155,21 @@ function restoreTabState(tab) {
         }
     }
 
-    const results = getTabResults(tab);
-    setCurrentResults(results);
+    const rawResults = getTabRawResults(tab);
+    setCurrentRawResults(rawResults);
 
-    if (results.length > 0) {
-        if (tab === "clusters") {
-            displayClusters(results);
-        } else {
-            displayPosts(results);
-        }
-        elements.aiSection?.classList.remove("hidden");
-        elements.nlQuerySection?.classList.remove("hidden");
-        elements.resultsHeader?.classList.remove("hidden");
-    } else {
-        if (elements.results) {
-            elements.results.innerHTML = "";
-        }
-        elements.aiSection?.classList.add("hidden");
-        elements.nlQuerySection?.classList.add("hidden");
-        elements.resultsHeader?.classList.add("hidden");
+    if (rawResults.length > 0) {
+        refreshResultsWithFilters();
+        return;
     }
+
+    setCurrentResults([]);
+    if (elements.results) {
+        elements.results.innerHTML = "";
+    }
+    elements.aiSection?.classList.add("hidden");
+    elements.nlQuerySection?.classList.add("hidden");
+    elements.resultsHeader?.classList.add("hidden");
 }
 
 function saveApiKeyFromModal() {
@@ -176,5 +181,48 @@ function saveApiKeyFromModal() {
     saveAPIKey(keyValue);
     alert("API key saved! ✅");
     elements.apiKeyModal?.classList.add("hidden");
+}
+
+function initScoreFilterControls() {
+    const { useSearchScore, minSearchScore } = getFilters();
+    if (elements.scoreFilterToggle) {
+        elements.scoreFilterToggle.checked = useSearchScore;
+    }
+    if (elements.scoreFilterSlider) {
+        elements.scoreFilterSlider.value = minSearchScore;
+        elements.scoreFilterSlider.disabled = !useSearchScore;
+    }
+    updateScoreFilterValue(minSearchScore);
+}
+
+function handleScoreFilterToggle(event) {
+    const enabled = event.target.checked;
+    if (elements.scoreFilterSlider) {
+        elements.scoreFilterSlider.disabled = !enabled;
+    }
+    updateFilters({ useSearchScore: enabled });
+    maybeRefreshResults();
+}
+
+function handleScoreFilterSlider(event) {
+    const value = Number(event.target.value);
+    updateScoreFilterValue(value);
+    updateFilters({ minSearchScore: value });
+    if (elements.scoreFilterToggle?.checked) {
+        maybeRefreshResults();
+    }
+}
+
+function updateScoreFilterValue(value) {
+    if (elements.scoreFilterValue) {
+        elements.scoreFilterValue.textContent = Number(value).toFixed(2);
+    }
+}
+
+function maybeRefreshResults() {
+    if (getCurrentRawResults().length === 0) {
+        return;
+    }
+    refreshResultsWithFilters();
 }
 

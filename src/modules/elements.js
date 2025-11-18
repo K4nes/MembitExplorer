@@ -30,6 +30,9 @@ export const elements = {
     viewMode: document.getElementById("viewMode"),
     maxResults: document.getElementById("maxResults"),
     maxResultsValue: document.getElementById("maxResultsValue"),
+    scoreFilterToggle: document.getElementById("scoreFilterToggle"),
+    scoreFilterSlider: document.getElementById("scoreFilterSlider"),
+    scoreFilterValue: document.getElementById("scoreFilterValue"),
     aiSummary: document.getElementById("aiSummary"),
     sentimentAnalysis: document.getElementById("sentimentAnalysis"),
 };

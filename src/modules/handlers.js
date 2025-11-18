@@ -12,7 +12,6 @@ import {
     getCurrentTab,
     getCurrentResults,
     setCurrentResults,
-    getTabResults,
     setTabResults,
     updateTabState,
     resetTabInsights,
@@ -20,6 +19,10 @@ import {
     addBookmark,
     hasBookmark,
     removeBookmarkAt,
+    getFilters,
+    getCurrentRawResults,
+    setCurrentRawResults,
+    setTabRawResults,
 } from "./state.js";
 import { fetchClusters, fetchPosts, fetchClusterInfo } from "./api.js";
 import { callGeminiAPI } from "./gemini.js";
@@ -28,6 +31,7 @@ import {
     formatNumber,
     truncate,
     parseMarkdownToHTML,
+    filterBySearchScore,
 } from "./utils.js";
 
 export async function handleSearch() {
@@ -47,7 +51,9 @@ export async function handleSearch() {
     const currentTab = getCurrentTab();
     const maxResults = Number(elements.maxResults?.value || 10);
     setCurrentResults([]);
+    setCurrentRawResults([]);
     setTabResults(currentTab, []);
+    setTabRawResults(currentTab, []);
     resetTabInsights(currentTab);
     updateTabState(currentTab, {
         searchInput: elements.searchInput.value,
@@ -65,21 +71,49 @@ export async function handleSearch() {
                 ? await fetchClusters({ query, apiKey, maxResults })
                 : await fetchPosts({ query, apiKey, maxResults });
 
-        setCurrentResults(results);
-        setTabResults(currentTab, results);
-
-        if (currentTab === "clusters") {
-            displayClusters(results);
-        } else {
-            displayPosts(results);
-        }
-
-        revealResultSections(results.length > 0);
+        setCurrentRawResults(results);
+        setTabRawResults(currentTab, results);
+        refreshResultsWithFilters();
     } catch (error) {
         showError(error.message);
     } finally {
         hideLoading();
     }
+}
+
+export function refreshResultsWithFilters() {
+    const currentTab = getCurrentTab();
+    const rawResults = getCurrentRawResults();
+
+    if (!Array.isArray(rawResults) || rawResults.length === 0) {
+        setCurrentResults([]);
+        setTabResults(currentTab, []);
+        if (currentTab === "clusters") {
+            displayClusters([]);
+        } else {
+            displayPosts([]);
+        }
+        revealResultSections(false);
+        return;
+    }
+
+    const filteredResults = applySearchFilters(rawResults);
+    setCurrentResults(filteredResults);
+    setTabResults(currentTab, filteredResults);
+
+    if (filteredResults.length === 0) {
+        showFilteredEmptyState();
+        revealResultSections(false);
+        return;
+    }
+
+    if (currentTab === "clusters") {
+        displayClusters(filteredResults);
+    } else {
+        displayPosts(filteredResults);
+    }
+
+    revealResultSections(true);
 }
 
 export async function generateAISummary() {
@@ -134,7 +168,6 @@ ${
         ? "4. Top influencers array (return an empty array if specific influencers cannot be identified)"
         : "4. Top 3-5 influencers (based on engagement and content quality) with reasons"
 }
-5. Key themes/topics discussed (3-5 single short sentences, each under 6 words, no commas)
 
 Format your response as JSON with this structure:
 {
@@ -152,13 +185,11 @@ Format your response as JSON with this structure:
       "name": "Full Name",
       "reason": "why they're influential"
     }
-  ],
-  "keyThemes": ["theme 1", "theme 2", ...]
+  ]
 }`;
 
         const analysis = await callGeminiAPI(prompt, true);
         const keyInsights = normalizeStringList(analysis.keyInsights);
-        const keyThemes = normalizeThemes(analysis.keyThemes, keyInsights);
         const influencers = Array.isArray(analysis.topInfluencers)
             ? analysis.topInfluencers.filter(
                   (influencer) =>
@@ -181,19 +212,6 @@ Format your response as JSON with this structure:
                             .map((insight) => `<li>${insight}</li>`)
                             .join("")}
                     </ul>
-                </div>
-                <div class="ai-themes-section">
-                    <h4><i class="fa-solid fa-thumbtack"></i> Key Themes</h4>
-                    <div class="themes-tags">
-                        ${
-                            keyThemes
-                                .map(
-                                    (theme) =>
-                                        `<span class="theme-tag">${theme}</span>`
-                                )
-                                .join("") || `<span class="theme-tag theme-tag--empty">Themes not detected</span>`
-                        }
-                    </div>
                 </div>
                 ${
                     !isClusters &&
@@ -434,6 +452,24 @@ export function exportResults() {
     URL.revokeObjectURL(url);
 }
 
+function applySearchFilters(results) {
+    if (!Array.isArray(results)) {
+        return [];
+    }
+    const { useSearchScore, minSearchScore } = getFilters();
+    if (!useSearchScore) {
+        return results;
+    }
+    return filterBySearchScore(results, minSearchScore);
+}
+
+function showFilteredEmptyState() {
+    if (!elements.results) return;
+    const { minSearchScore } = getFilters();
+    const scoreText = Number(minSearchScore).toFixed(2);
+    elements.results.innerHTML = `<p class="empty-state">No results matched search score ≥ ${scoreText}</p>`;
+}
+
 function renderBookmarksList() {
     if (!elements.bookmarksList) return;
     const bookmarks = getBookmarks();
@@ -512,44 +548,3 @@ function normalizeStringList(value) {
     }
     return [];
 }
-
-function normalizeThemes(rawThemes, fallbackInsights = []) {
-    const themes = normalizeStringList(rawThemes);
-    if (themes.length > 0) {
-        return themes.map(shortenTheme).filter(Boolean);
-    }
-    if (!Array.isArray(fallbackInsights)) {
-        return [];
-    }
-    return fallbackInsights
-        .map((insight) => {
-            if (typeof insight !== "string") {
-                return "";
-            }
-            const cleaned = insight
-                .split(/[:.!?-]/)[0]
-                .replace(/^[\d•\-\s]+/, "")
-                .trim();
-            return cleaned;
-        })
-        .map(shortenTheme)
-        .filter(Boolean)
-        .slice(0, 5);
-}
-
-function shortenTheme(text) {
-    if (typeof text !== "string") {
-        return "";
-    }
-    const normalized = text
-        .replace(/[,;:/]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-    const words = normalized.split(" ").filter(Boolean);
-    if (words.length === 0) {
-        return "";
-    }
-    const sliced = words.slice(0, 6).join(" ");
-    return sliced.charAt(0).toUpperCase() + sliced.slice(1);
-}
-

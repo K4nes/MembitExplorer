@@ -1,4 +1,4 @@
-import { SUMMARY_PLACEHOLDER } from "./constants.js";
+import { SUMMARY_PLACEHOLDER, MIN_SEARCH_SCORE } from "./constants.js";
 
 const createTabState = () => ({
     searchInput: "",
@@ -9,7 +9,12 @@ const createTabState = () => ({
 
 let currentTab = "clusters";
 let currentResults = [];
+let currentRawResults = [];
 const tabResults = {
+    clusters: [],
+    posts: [],
+};
+const tabRawResults = {
     clusters: [],
     posts: [],
 };
@@ -17,6 +22,13 @@ const tabState = {
     clusters: createTabState(),
     posts: createTabState(),
 };
+
+const createFilterState = () => ({
+    useSearchScore: false,
+    minSearchScore: MIN_SEARCH_SCORE,
+});
+
+let filters = createFilterState();
 
 let bookmarks = JSON.parse(localStorage.getItem("membit_bookmarks") || "[]");
 
@@ -40,12 +52,28 @@ export function setCurrentResults(results) {
     currentResults = Array.isArray(results) ? [...results] : [];
 }
 
+export function getCurrentRawResults() {
+    return currentRawResults;
+}
+
+export function setCurrentRawResults(results) {
+    currentRawResults = Array.isArray(results) ? [...results] : [];
+}
+
 export function getTabResults(tab) {
     return tabResults[tab] || [];
 }
 
 export function setTabResults(tab, results) {
     tabResults[tab] = Array.isArray(results) ? [...results] : [];
+}
+
+export function getTabRawResults(tab) {
+    return tabRawResults[tab] || [];
+}
+
+export function setTabRawResults(tab, results) {
+    tabRawResults[tab] = Array.isArray(results) ? [...results] : [];
 }
 
 export function getTabState(tab) {
@@ -89,5 +117,16 @@ export function removeBookmarkAt(index) {
     const [removed] = bookmarks.splice(index, 1);
     persistBookmarks();
     return removed;
+}
+
+export function getFilters() {
+    return { ...filters };
+}
+
+export function updateFilters(updates) {
+    filters = {
+        ...filters,
+        ...updates,
+    };
 }
 

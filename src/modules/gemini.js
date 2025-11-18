@@ -33,13 +33,8 @@ export const SUMMARY_SCHEMA = {
                 required: ["reason"],
             },
         },
-        keyThemes: {
-            type: "array",
-            items: { type: "string" },
-            minItems: 1,
-        },
     },
-    required: ["summary", "keyInsights", "sentiment", "keyThemes", "topInfluencers"],
+    required: ["summary", "keyInsights", "sentiment", "topInfluencers"],
 };
 
 export async function callGeminiAPI(prompt, options = {}) {

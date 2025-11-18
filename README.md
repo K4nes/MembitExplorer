@@ -28,7 +28,6 @@ The application connects to the Membit API to fetch real-time social media data 
 -   **AI Insights**: Generate comprehensive summaries with:
     -   Main themes and discussions
     -   Key insights
-    -   Key themes
 -   **Natural Language Queries**: Ask questions about search results in plain English
 -   **Contextual Analysis**: AI analyzes up to 20 results to provide meaningful insights
 

@@ -8,3 +8,5 @@ export const TAB_PLACEHOLDERS = {
     posts: "Search for topics, keywords, or hashtags...",
 };
 
+export const MIN_SEARCH_SCORE = 0.6;
+

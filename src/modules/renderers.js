@@ -4,8 +4,7 @@ import { formatNumber, truncate } from "./utils.js";
 export function displayPosts(posts) {
     if (!elements.results) return;
     if (posts.length === 0) {
-        elements.results.innerHTML =
-            '<p class="empty-state">No posts found</p>';
+        elements.results.innerHTML = '<p class="empty-state">No posts found</p>';
         return;
     }
 
@@ -55,8 +54,7 @@ export function displayPosts(posts) {
 export function displayClusters(clusters) {
     if (!elements.results) return;
     if (clusters.length === 0) {
-        elements.results.innerHTML =
-            '<p class="empty-state">No clusters found</p>';
+        elements.results.innerHTML = '<p class="empty-state">No clusters found</p>';
         return;
     }
 
