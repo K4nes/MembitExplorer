@@ -731,6 +731,36 @@
     color: var(--muted-foreground);
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.x-content-copy {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted-foreground);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.x-content-copy:hover,
+.x-content-copy:focus-visible {
+    border-color: var(--card-foreground);
+    color: var(--card-foreground);
+    background: var(--bg-tertiary);
+}
+
+.x-content-copy.copied {
+    border-color: var(--success);
+    color: var(--success);
 }
 
 .ai-insights-section h4,

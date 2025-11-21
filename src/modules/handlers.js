@@ -669,11 +669,19 @@ function renderXContent(content) {
             <p class="x-content-text">${safe}</p>
             <div class="x-content-meta">
                 <span>${content.length}/280 characters</span>
+                <button
+                    type="button"
+                    class="x-content-copy"
+                    aria-label="Copy X content"
+                >
+                    <i class="fa-regular fa-clipboard"></i>
+                </button>
             </div>
         </div>
     `;
     elements.xContentOutput.innerHTML = markup;
     elements.xContentOutput.classList.remove("hidden");
+    initializeXContentCopy(content);
 }
 
 function renderXContentError(message) {
@@ -693,6 +701,64 @@ function clearXContent() {
     elements.xContentOutput.innerHTML = "";
     elements.xContentOutput.classList.add("hidden");
     updateTabState(getCurrentTab(), { xContent: "" });
+}
+
+function initializeXContentCopy(content) {
+    const copyBtn =
+        elements.xContentOutput?.querySelector(".x-content-copy");
+    if (!copyBtn) {
+        return;
+    }
+    copyBtn.addEventListener("click", () =>
+        copyXContentToClipboard(content, copyBtn)
+    );
+}
+
+async function copyXContentToClipboard(content, trigger) {
+    if (!content) {
+        return;
+    }
+    try {
+        if (navigator?.clipboard?.writeText) {
+            await navigator.clipboard.writeText(content);
+        } else {
+            legacyClipboardCopy(content);
+        }
+    } catch (_error) {
+        legacyClipboardCopy(content);
+    } finally {
+        setCopyFeedback(trigger);
+    }
+}
+
+function legacyClipboardCopy(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "absolute";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+}
+
+function setCopyFeedback(button) {
+    if (!button) {
+        return;
+    }
+    button.classList.add("copied");
+    button.setAttribute("aria-label", "Copied to clipboard");
+    const previousTimeoutId = Number(button.dataset.copyTimeoutId || 0);
+    if (previousTimeoutId) {
+        window.clearTimeout(previousTimeoutId);
+    }
+    const timeoutId = window.setTimeout(() => {
+        button.classList.remove("copied");
+        button.setAttribute("aria-label", "Copy X content");
+        button.dataset.copyTimeoutId = "";
+    }, 1500);
+    button.dataset.copyTimeoutId = `${timeoutId}`;
 }
 
 function escapeHTML(value) {
