@@ -6,6 +6,9 @@ import {
     openBookmarksModal,
     exportResults,
     refreshResultsWithFilters,
+    generateXContentFromSummary,
+    setSummaryActionState,
+    hasRenderableSummary,
 } from "./handlers.js";
 import { toggleTheme, saveAPIKey, showModal } from "./ui.js";
 import {
@@ -49,6 +52,29 @@ export function attachEventListeners() {
         });
     });
 
+    document.querySelectorAll(".ai-tab").forEach((tab) => {
+        tab.addEventListener("click", (event) => {
+            const target = event.currentTarget;
+            const panelId = target.dataset.panel;
+            if (!panelId) return;
+
+            document
+                .querySelectorAll(".ai-tab")
+                .forEach((btn) => btn.classList.remove("active"));
+            target.classList.add("active");
+
+            document.querySelectorAll(".ai-copy-panel").forEach((panel) => {
+                if (panel.id === panelId) {
+                    panel.classList.remove("hidden");
+                    panel.setAttribute("aria-hidden", "false");
+                } else {
+                    panel.classList.add("hidden");
+                    panel.setAttribute("aria-hidden", "true");
+                }
+            });
+        });
+    });
+
     elements.themeToggle?.addEventListener("click", toggleTheme);
     elements.bookmarksBtn?.addEventListener("click", openBookmarksModal);
     elements.apiKeyBtn?.addEventListener("click", () => {
@@ -89,16 +115,11 @@ export function attachEventListeners() {
 
     elements.exportBtn?.addEventListener("click", exportResults);
 
-    elements.viewMode?.addEventListener("change", (event) => {
-        if (!elements.results) return;
-        if (event.target.value === "list") {
-            elements.results.classList.add("list-view");
-        } else {
-            elements.results.classList.remove("list-view");
-        }
-    });
-
     elements.generateSummary?.addEventListener("click", generateAISummary);
+    elements.convertToXContentBtn?.addEventListener(
+        "click",
+        generateXContentFromSummary
+    );
 
     elements.nlQueryBtn?.addEventListener("click", handleNLQuery);
     elements.nlQueryInput?.addEventListener("keypress", (event) => {
@@ -123,6 +144,7 @@ function persistCurrentTabState() {
         aiSummary: elements.aiSummary?.innerHTML || SUMMARY_PLACEHOLDER,
         nlQueryInput: elements.nlQueryInput?.value || "",
         nlQueryResponse: elements.nlQueryResponse?.innerHTML || "",
+        xContent: elements.xContentOutput?.innerHTML || "",
     });
     setTabResults(currentTab, getCurrentResults());
     setTabRawResults(currentTab, getCurrentRawResults());
@@ -137,8 +159,33 @@ function restoreTabState(tab) {
     }
 
     if (elements.aiSummary) {
-        elements.aiSummary.innerHTML =
-            tabSettings?.aiSummary || SUMMARY_PLACEHOLDER;
+        const summaryContent = tabSettings?.aiSummary;
+        const hasContent =
+            summaryContent && summaryContent !== SUMMARY_PLACEHOLDER;
+
+        if (hasContent) {
+            elements.aiSummary.innerHTML = summaryContent;
+            elements.aiSummary.classList.remove("hidden");
+            elements.summaryLauncher?.classList.remove("summary-launcher--idle");
+        } else {
+            elements.aiSummary.innerHTML = "";
+            elements.aiSummary.classList.add("hidden");
+            elements.summaryLauncher?.classList.add("summary-launcher--idle");
+        }
+
+        setSummaryActionState(hasRenderableSummary(summaryContent));
+    }
+
+    const latestState = getTabState(tab);
+    if (elements.xContentOutput) {
+        if (latestState?.xContent) {
+            elements.xContentOutput.innerHTML = latestState.xContent;
+            elements.xContentOutput.classList.remove("hidden");
+            elements.xContent?.classList.remove("hidden");
+        } else {
+            elements.xContentOutput.innerHTML = "";
+            elements.xContentOutput.classList.add("hidden");
+        }
     }
 
     if (elements.nlQueryInput) {
@@ -168,6 +215,7 @@ function restoreTabState(tab) {
         elements.results.innerHTML = "";
     }
     elements.aiSection?.classList.add("hidden");
+    elements.insightsColumn?.classList.add("hidden");
     elements.nlQuerySection?.classList.add("hidden");
     elements.resultsHeader?.classList.add("hidden");
 }

@@ -5,8 +5,8 @@ export function showLoading() {
     if (elements.results) {
         elements.results.innerHTML = "";
     }
+    elements.resultsSection?.classList.remove("hidden");
     elements.resultsHeader?.classList.add("hidden");
-    elements.aiSection?.classList.add("hidden");
     elements.nlQuerySection?.classList.add("hidden");
     if (elements.nlQueryResponse) {
         elements.nlQueryResponse.innerHTML = "";

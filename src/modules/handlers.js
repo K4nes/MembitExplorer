@@ -241,12 +241,68 @@ Format your response as JSON with this structure:
             </div>
         `;
 
-        elements.aiSummary.innerHTML = summaryHTML;
+        elements.summaryLauncher?.classList.remove("summary-launcher--idle");
+        clearXContent();
+        if (elements.aiSummary) {
+            elements.aiSummary.classList.remove("hidden");
+            elements.aiSummary.innerHTML = summaryHTML;
+        }
         updateTabState(getCurrentTab(), { aiSummary: summaryHTML });
+        setSummaryActionState(true);
     } catch (error) {
         const errorHTML = `<div class="error-message">Error: ${error.message}</div>`;
-        elements.aiSummary.innerHTML = errorHTML;
+        elements.summaryLauncher?.classList.add("summary-launcher--idle");
+        if (elements.aiSummary) {
+            elements.aiSummary.classList.remove("hidden");
+            elements.aiSummary.innerHTML = errorHTML;
+        }
         updateTabState(getCurrentTab(), { aiSummary: errorHTML });
+        setSummaryActionState(false);
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+}
+
+export async function generateXContentFromSummary() {
+    const btn = elements.convertToXContentBtn;
+    if (!btn) {
+        return;
+    }
+
+    const summaryText = extractSummaryText();
+    if (!summaryText) {
+        renderXContentError("Generate a summary before crafting X content.");
+        return;
+    }
+
+    const originalText = btn.textContent;
+    btn.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> Crafting...';
+    btn.disabled = true;
+
+    if (elements.xContent) {
+        elements.xContent.classList.remove("hidden");
+    }
+    if (elements.xContentOutput) {
+        elements.xContentOutput.classList.remove("hidden");
+        elements.xContentOutput.innerHTML =
+            '<div class="loading"><div class="loader"></div><p>Turning insights into X-ready copy...</p></div>';
+    }
+
+    try {
+        const prompt = `You are a social media strategist. Using the summary below, write a compelling single X (Twitter) post with a maximum of 280 characters. Use a strong hook, keep it conversational, reference the market sentiment, and avoid hashtags or emoji overload. Return only the post text.
+
+Summary:
+${summaryText}`;
+
+        const response = await callGeminiAPI(prompt, false);
+        const formattedPost = formatXPost(response);
+        renderXContent(formattedPost);
+        updateTabState(getCurrentTab(), {
+            xContent: elements.xContentOutput?.innerHTML || "",
+        });
+    } catch (error) {
+        renderXContentError(`Error: ${error.message}`);
     } finally {
         btn.textContent = originalText;
         btn.disabled = false;
@@ -508,8 +564,11 @@ function renderBookmarksList() {
 
 function resetInsightsUI() {
     if (elements.aiSummary) {
-        elements.aiSummary.innerHTML = SUMMARY_PLACEHOLDER;
+        elements.aiSummary.innerHTML = "";
+        elements.aiSummary.classList.add("hidden");
     }
+    elements.summaryLauncher?.classList.add("summary-launcher--idle");
+    setSummaryActionState(false);
     if (elements.nlQueryInput) {
         elements.nlQueryInput.value = "";
     }
@@ -520,18 +579,22 @@ function resetInsightsUI() {
 }
 
 function revealResultSections(hasResults) {
-    if (!elements.aiSection || !elements.nlQuerySection || !elements.resultsHeader) {
-        return;
-    }
-    if (hasResults) {
-        elements.aiSection.classList.remove("hidden");
-        elements.nlQuerySection.classList.remove("hidden");
-        elements.resultsHeader.classList.remove("hidden");
-    } else {
-        elements.aiSection.classList.add("hidden");
-        elements.nlQuerySection.classList.add("hidden");
-        elements.resultsHeader.classList.add("hidden");
-    }
+    const sections = [
+        elements.insightsColumn,
+        elements.aiSection,
+        elements.nlQuerySection,
+        elements.resultsHeader,
+        elements.resultsSection,
+    ];
+
+    sections.forEach((section) => {
+        if (!section) return;
+        if (hasResults) {
+            section.classList.remove("hidden");
+        } else {
+            section.classList.add("hidden");
+        }
+    });
 }
 
 function normalizeStringList(value) {
@@ -547,4 +610,101 @@ function normalizeStringList(value) {
             .filter(Boolean);
     }
     return [];
+}
+
+export function setSummaryActionState(hasSummary) {
+    if (elements.generateSummary) {
+        elements.generateSummary.textContent = hasSummary
+            ? "Regenerate Summary"
+            : "Generate Summary";
+        elements.generateSummary.disabled = false;
+    }
+
+    if (hasSummary) {
+        elements.convertToXContentBtn?.classList.remove("hidden");
+        elements.xContent?.classList.remove("hidden");
+        return;
+    }
+
+    elements.convertToXContentBtn?.classList.add("hidden");
+    elements.xContent?.classList.add("hidden");
+    clearXContent();
+}
+
+export function hasRenderableSummary(content) {
+    if (!content) {
+        return false;
+    }
+    const stripped = content.replace(/\s+/g, "").trim();
+    const placeholder = SUMMARY_PLACEHOLDER.replace(/\s+/g, "").trim();
+    if (!stripped || stripped === placeholder) {
+        return false;
+    }
+    return !content.includes("error-message");
+}
+
+function extractSummaryText() {
+    if (!elements.aiSummary) {
+        return "";
+    }
+    const text = elements.aiSummary.textContent || "";
+    return text.replace(/\s+/g, " ").trim();
+}
+
+function formatXPost(text) {
+    const normalized = (text || "").replace(/\s+/g, " ").trim();
+    if (normalized.length <= 280) {
+        return normalized;
+    }
+    return `${normalized.slice(0, 277).trim()}...`;
+}
+
+function renderXContent(content) {
+    if (!elements.xContentOutput) {
+        return;
+    }
+    const safe = escapeHTML(content).replace(/\n/g, "<br />");
+    const markup = `
+        <div class="x-content-card">
+            <p class="x-content-text">${safe}</p>
+            <div class="x-content-meta">
+                <span>${content.length}/280 characters</span>
+            </div>
+        </div>
+    `;
+    elements.xContentOutput.innerHTML = markup;
+    elements.xContentOutput.classList.remove("hidden");
+}
+
+function renderXContentError(message) {
+    if (!elements.xContentOutput) {
+        return;
+    }
+    elements.xContentOutput.innerHTML = `<div class="error-message">${escapeHTML(
+        message
+    )}</div>`;
+    elements.xContentOutput.classList.remove("hidden");
+}
+
+function clearXContent() {
+    if (!elements.xContentOutput) {
+        return;
+    }
+    elements.xContentOutput.innerHTML = "";
+    elements.xContentOutput.classList.add("hidden");
+    updateTabState(getCurrentTab(), { xContent: "" });
+}
+
+function escapeHTML(value) {
+    return (value || "").replace(
+        /[&<>"']/g,
+        (char) =>
+            ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+            }[char] || char)
+    );
 }

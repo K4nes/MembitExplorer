@@ -62,169 +62,253 @@
             <!-- Main Content -->
             <main class="main">
                 <div class="container">
-                    <!-- Search Section -->
-                    <section class="search-section">
-                        <div class="search-tabs">
-                            <button class="tab-btn active" data-tab="clusters">
-                                Search Clusters
-                            </button>
-                            <button class="tab-btn" data-tab="posts">
-                                Search Posts
-                            </button>
-                        </div>
+                    <div class="search-tabs">
+                        <button class="tab-btn active" data-tab="clusters">
+                            Search Clusters
+                        </button>
+                        <button class="tab-btn" data-tab="posts">
+                            Search Posts
+                        </button>
+                    </div>
 
-                        <div class="search-container">
-                            <div class="search-box">
-                                <input
-                                    type="text"
-                                    id="searchInput"
-                                    placeholder="Search for trending topic clusters..."
-                                    minlength="3"
-                                />
-                                <button id="searchBtn" class="btn btn-primary">
-                                    <span class="btn-text">Search</span>
-                                    <span class="btn-loader hidden"
-                                        ><i
-                                            class="fa-solid fa-hourglass-half"
-                                        ></i
-                                    ></span>
-                                </button>
-                            </div>
-
-                            <!-- Advanced Filters -->
-                            <div class="filters collapsed" id="filters">
-                                <button class="filter-toggle" id="filterToggle">
-                                    Advanced Filters
-                                    <i
-                                        class="fa-solid fa-chevron-down arrow"
-                                    ></i>
-                                </button>
-                                <div class="filter-content">
-                                    <div class="filter-group">
-                                        <label
-                                            >Max Results:
-                                            <span id="maxResultsValue"
-                                                >10</span
-                                            ></label
+                    <div class="dashboard-grid">
+                        <section class="search-column">
+                            <!-- Search Section -->
+                            <section class="search-section">
+                                <div class="search-container">
+                                    <label
+                                        class="search-label"
+                                        for="searchInput"
+                                    >
+                                        What would you like to explore today?
+                                    </label>
+                                    <div class="query-field">
+                                        <input
+                                            type="text"
+                                            id="searchInput"
+                                            placeholder="Search for trending topic clusters..."
+                                            minlength="3"
+                                        />
+                                        <button
+                                            id="searchBtn"
+                                            class="btn btn-primary query-btn"
                                         >
-                                        <input
-                                            type="range"
-                                            id="maxResults"
-                                            min="10"
-                                            max="50"
-                                            value="10"
-                                            step="1"
-                                            class="max-results-slider"
-                                        />
+                                            <span class="sr-only">Search</span>
+                                            <i class="fa-solid fa-arrow-up"></i>
+                                            <span class="btn-loader hidden"
+                                                ><i
+                                                    class="fa-solid fa-hourglass-half"
+                                                ></i
+                                            ></span>
+                                        </button>
                                     </div>
-                                    <div class="filter-group">
-                                        <label class="filter-checkbox">
-                                            <input
-                                                type="checkbox"
-                                                id="scoreFilterToggle"
-                                            />
-                                            <span>
-                                                Minimum search score:
-                                                <strong id="scoreFilterValue"
-                                                    >0.60</strong
+
+                                    <!-- Advanced Filters -->
+                                    <div class="filters collapsed" id="filters">
+                                        <button
+                                            class="filter-toggle"
+                                            id="filterToggle"
+                                        >
+                                            Advanced Filters
+                                            <i
+                                                class="fa-solid fa-chevron-down arrow"
+                                            ></i>
+                                        </button>
+                                        <div class="filter-content">
+                                            <div class="filter-group">
+                                                <label
+                                                    >Max Results:
+                                                    <span id="maxResultsValue"
+                                                        >10</span
+                                                    ></label
                                                 >
-                                            </span>
-                                        </label>
-                                        <input
-                                            type="range"
-                                            id="scoreFilterSlider"
-                                            min="0"
-                                            max="1"
-                                            step="0.05"
-                                            value="0.6"
-                                            class="max-results-slider score-filter-slider"
-                                            disabled
-                                            aria-label="Search score threshold"
-                                        />
-                                        <p class="filter-note">
-                                            Enable to hide results with
-                                            Membit's search_score below the
-                                            threshold.
-                                        </p>
+                                                <input
+                                                    type="range"
+                                                    id="maxResults"
+                                                    min="10"
+                                                    max="50"
+                                                    value="10"
+                                                    step="1"
+                                                    class="max-results-slider"
+                                                />
+                                            </div>
+                                            <div class="filter-group">
+                                                <label class="filter-checkbox">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="scoreFilterToggle"
+                                                    />
+                                                    <span>
+                                                        Minimum search score:
+                                                        <strong
+                                                            id="scoreFilterValue"
+                                                            >0.60</strong
+                                                        >
+                                                    </span>
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    id="scoreFilterSlider"
+                                                    min="0"
+                                                    max="1"
+                                                    step="0.05"
+                                                    value="0.6"
+                                                    class="max-results-slider score-filter-slider"
+                                                    disabled
+                                                    aria-label="Search score threshold"
+                                                />
+                                                <p class="filter-note">
+                                                    Enable to hide results with
+                                                    Membit's search_score below
+                                                    the threshold.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </section>
+                            </section>
 
-                    <!-- Natural Language Query Section -->
-                    <section
-                        class="nl-query-section hidden"
-                        id="nlQuerySection"
-                    >
-                        <div class="nl-query-card">
-                            <h3>
-                                <i class="fa-solid fa-comments"></i> Ask AI
-                                About Results
-                            </h3>
-                            <div class="nl-query-box">
-                                <input
-                                    type="text"
-                                    id="nlQueryInput"
-                                    placeholder="Ask anything about the results... (e.g., 'What are the main themes?')"
-                                    class="nl-query-input"
-                                />
-                                <button id="nlQueryBtn" class="btn btn-primary">
-                                    Ask
-                                </button>
-                            </div>
-                            <div
-                                id="nlQueryResponse"
-                                class="nl-query-response hidden"
-                            ></div>
-                        </div>
-                    </section>
-
-                    <!-- AI Summary Section -->
-                    <section class="ai-section hidden" id="aiSection">
-                        <div class="ai-card">
-                            <div class="ai-card-header">
-                                <h3>
-                                    <i class="fa-solid fa-robot"></i> AI
-                                    Insights
-                                </h3>
-                                <button
-                                    id="generateSummary"
-                                    class="btn btn-secondary btn-sm"
+                            <!-- Results Section -->
+                            <section
+                                class="results-section hidden"
+                                id="resultsSection"
+                            >
+                                <div
+                                    class="results-header hidden"
+                                    id="resultsHeader"
                                 >
-                                    Generate Insights
-                                </button>
-                            </div>
-                            <div id="aiSummary" class="ai-content">
-                                <p class="ai-placeholder">
-                                    Click "Generate Insights" to get AI-powered
-                                    analysis
-                                </p>
-                            </div>
-                        </div>
-                    </section>
+                                    <div>
+                                        <h2>Results</h2>
+                                    </div>
+                                    <div class="results-actions">
+                                        <button
+                                            id="exportBtn"
+                                            class="btn btn-outline"
+                                        >
+                                            Export
+                                        </button>
+                                    </div>
+                                </div>
+                                <div
+                                    id="results"
+                                    class="results-grid list-view"
+                                ></div>
+                                <div id="loading" class="loading hidden">
+                                    <div class="loader"></div>
+                                    <p>Searching...</p>
+                                </div>
+                                <div
+                                    id="error"
+                                    class="error-message hidden"
+                                ></div>
+                            </section>
+                        </section>
 
-                    <!-- Results Section -->
-                    <section class="results-section" id="resultsSection">
-                        <div class="results-header hidden" id="resultsHeader">
-                            <h2>Results</h2>
-                            <div class="results-actions">
-                                <button id="exportBtn" class="btn btn-outline">
-                                    Export
-                                </button>
-                                <select id="viewMode" class="view-selector">
-                                    <option value="grid">Grid View</option>
-                                    <option value="list">List View</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div id="results" class="results-grid"></div>
-                        <div id="loading" class="loading hidden">
-                            <div class="loader"></div>
-                            <p>Searching...</p>
-                        </div>
-                        <div id="error" class="error-message hidden"></div>
-                    </section>
+                        <aside
+                            class="insights-column hidden"
+                            id="insightsColumn"
+                        >
+                            <section
+                                class="ai-section insights-tabs"
+                                id="aiSection"
+                            >
+                                <div class="ai-tabs" role="tablist">
+                                    <button
+                                        class="ai-tab active"
+                                        type="button"
+                                        data-panel="summaryLauncher"
+                                        aria-controls="summaryLauncher"
+                                    >
+                                        Summary
+                                    </button>
+                                    <button
+                                        class="ai-tab"
+                                        type="button"
+                                        data-panel="analysisPanel"
+                                        aria-controls="analysisPanel"
+                                    >
+                                        Ask AI
+                                    </button>
+                                </div>
+                                <div
+                                    id="summaryLauncher"
+                                    class="ai-card summary-launcher summary-launcher--idle ai-copy-panel"
+                                    aria-hidden="false"
+                                >
+                                    <div
+                                        id="aiSummary"
+                                        class="ai-content hidden"
+                                    ></div>
+                                    <button
+                                        id="generateSummary"
+                                        class="btn btn-outline btn-lg summary-action"
+                                    >
+                                        Generate Summary
+                                    </button>
+                                    <div
+                                        id="xContent"
+                                        class="x-content-section hidden"
+                                        aria-live="polite"
+                                    >
+                                        <button
+                                            id="convertToXContent"
+                                            class="btn btn-outline btn-lg summary-action"
+                                        >
+                                            Turn to X Content
+                                        </button>
+                                        <div
+                                            id="xContentOutput"
+                                            class="ai-content x-content-output hidden"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <div
+                                    id="analysisPanel"
+                                    class="ai-card ai-copy-panel hidden"
+                                    aria-hidden="true"
+                                >
+                                    <section
+                                        class="nl-query-section hidden"
+                                        id="nlQuerySection"
+                                    >
+                                        <div class="nl-query-card">
+                                            <h3>
+                                                <i
+                                                    class="fa-solid fa-robot"
+                                                ></i>
+                                                Ask about the Results
+                                            </h3>
+                                            <div class="nl-query-box">
+                                                <div
+                                                    class="nl-query-input-wrapper"
+                                                >
+                                                    <input
+                                                        type="text"
+                                                        id="nlQueryInput"
+                                                        placeholder="Ask anything about the results..."
+                                                        class="nl-query-input"
+                                                    />
+                                                    <button
+                                                        id="nlQueryBtn"
+                                                        class="chatbot-send"
+                                                        aria-label="Send question"
+                                                    >
+                                                        <i
+                                                            class="fa-solid fa-arrow-up"
+                                                        ></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div
+                                                id="nlQueryResponse"
+                                                class="nl-query-response hidden"
+                                            ></div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </section>
+                        </aside>
+                    </div>
                 </div>
             </main>
 

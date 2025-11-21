@@ -5,6 +5,7 @@ const createTabState = () => ({
     aiSummary: SUMMARY_PLACEHOLDER,
     nlQueryInput: "",
     nlQueryResponse: "",
+    xContent: "",
 });
 
 let currentTab = "clusters";
@@ -94,6 +95,7 @@ export function resetTabInsights(tab) {
         aiSummary: SUMMARY_PLACEHOLDER,
         nlQueryInput: "",
         nlQueryResponse: "",
+        xContent: "",
     };
 }
 
